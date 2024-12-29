@@ -1,5 +1,3 @@
-### README.md
-
 # Real-Time Active User Counter System with Spring Boot & Redis
 
 This project implements a **real-time active user counter system** using **Spring Boot**, **Redis**, and **WebSockets**. It demonstrates how to manage and display the number of active users on a website in real time. The system is designed to scale and efficiently handle millions of concurrent users.
