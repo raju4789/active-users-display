@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Active Users</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #userCount {
+            font-size: 48px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<h1>Active Users</h1>
+<div id="userCount">0</div>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function () {
+            stompClient.subscribe('/topic/activeUsers', function (message) {
+                document.getElementById('userCount').innerText = message.body;
+            });
+        }, function () {
+            console.error('WebSocket connection failed. Retrying...');
+            setTimeout(connect, 5000); // Retry every 5 seconds
+        });
+    }
+
+    connect();
+</script>
+</body>
+</html>
