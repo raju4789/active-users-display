@@ -55,10 +55,34 @@ cd active-user-counter
 
 ### Set Up Redis
 
+#### Option 1: Using Docker Compose (Recommended)
+
+```bash
+# Start Redis using Docker Compose
+docker-compose up -d
+
+# Check if Redis is running
+docker-compose ps
+```
+
+#### Option 2: Using Docker directly
+
 If you don't have Redis installed, you can run it using Docker:
 
 ```bash
 docker run --name redis -p 6379:6379 -d redis
+```
+
+#### Option 3: Local Redis Installation
+
+```bash
+# On macOS with Homebrew
+brew install redis
+brew services start redis
+
+# On Ubuntu/Debian
+sudo apt-get install redis-server
+sudo systemctl start redis
 ```
 
 ### Run the Spring Boot Application
