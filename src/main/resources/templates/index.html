@@ -1,81 +1,85 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Active Users</title>
+    <title>Real-Time Active Users | Spring Boot & Redis</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        #userCount {
-            font-size: 48px;
-            color: #007bff;
-        }
-    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
 </head>
 <body>
-<h1>Active Users</h1>
-<div id="userCount">0</div>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Real-Time Active Users</h1>
+            <p class="subtitle">Powered by Spring Boot, Redis & WebSockets</p>
+        </div>
 
-<script>
-    let stompClient = null;
-    let isConnected = false;
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div class="stat-value" id="serverCapacity">1,000,000</div>
+                <div class="stat-label">Server Capacity</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="stat-value" id="redisConnections">100</div>
+                <div class="stat-label">Redis Pool</div>
+            </div>
+        </div>
 
-    function fetchCurrentUserCount() {
-        fetch('/api/active-users/count')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('userCount').innerText = formatUserCount(data.count);
-                console.log('Fetched current user count:', data.count);
-            })
-            .catch(error => {
-                console.error('Failed to fetch current user count:', error);
-            });
-    }
+        <div class="main-counter">
+            <div class="counter-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="user-count" id="userCount">0</div>
+            <div class="counter-label">Active Users Online</div>
+        </div>
 
-    function formatUserCount(count) {
-        return count.toLocaleString();
-    }
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-text" id="statusText">Connected</span>
+            </div>
+            <div class="capacity-info" id="capacityInfo">
+                Capacity: <span id="capacityPercent">0%</span>
+            </div>
+        </div>
 
-    function connect() {
-        if (isConnected) {
-            console.log("Already connected, skipping connection attempt");
-            return;
-        }
-        
-        const socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
+        <div class="tech-stack">
+            <div class="tech-badge">
+                <i class="fab fa-java"></i> Spring Boot
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-database"></i> Redis
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-plug"></i> WebSockets
+            </div>
+            <div class="tech-badge">
+                <i class="fas fa-leaf"></i> Thymeleaf
+            </div>
+        </div>
 
-        stompClient.connect({}, function () {
-            isConnected = true;
-            console.log("WebSocket connected successfully");
-            
-            // Subscribe to user count updates
-            stompClient.subscribe('/topic/activeUsers', function (message) {
-                const countElement = document.getElementById('userCount');
-                const count = parseInt(message.body);
-                countElement.innerText = formatUserCount(count);
-                console.log("Received user count update:", count);
-            });
-            
-            // Request current count immediately after connection
-            fetchCurrentUserCount();
-            
-        }, function (error) {
-            isConnected = false;
-            console.error('WebSocket connection failed:', error);
-            setTimeout(connect, 5000); // Retry every 5 seconds
-        });
-    }
+        <div class="footer">
+            <div class="footer-links">
+                <a href="https://github.com/raju4789/active-users-display" class="footer-link" target="_blank">
+                    <i class="fab fa-github"></i> View Source
+                </a>
+                <a href="https://medium.com/@narasimha4789/from-zero-to-millions-designing-a-real-time-active-user-counter-system-a5d9545bd35e" class="footer-link" target="_blank">
+                    <i class="fab fa-medium"></i> Read Article
+                </a>
+            </div>
+            <p class="footer-text">Built with ❤️ for scalable real-time applications</p>
+        </div>
+    </div>
 
-    // Fetch initial count on page load
-    fetchCurrentUserCount();
-    
-    // Connect to WebSocket
-    connect();
-</script>
+    <script src="/js/app.js"></script>
 </body>
 </html>
