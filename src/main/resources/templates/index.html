@@ -22,21 +22,59 @@
 
 <script>
     let stompClient = null;
+    let isConnected = false;
+
+    function fetchCurrentUserCount() {
+        fetch('/api/active-users/count')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('userCount').innerText = formatUserCount(data.count);
+                console.log('Fetched current user count:', data.count);
+            })
+            .catch(error => {
+                console.error('Failed to fetch current user count:', error);
+            });
+    }
+
+    function formatUserCount(count) {
+        return count.toLocaleString();
+    }
 
     function connect() {
+        if (isConnected) {
+            console.log("Already connected, skipping connection attempt");
+            return;
+        }
+        
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function () {
+            isConnected = true;
+            console.log("WebSocket connected successfully");
+            
+            // Subscribe to user count updates
             stompClient.subscribe('/topic/activeUsers', function (message) {
-                document.getElementById('userCount').innerText = message.body;
+                const countElement = document.getElementById('userCount');
+                const count = parseInt(message.body);
+                countElement.innerText = formatUserCount(count);
+                console.log("Received user count update:", count);
             });
-        }, function () {
-            console.error('WebSocket connection failed. Retrying...');
+            
+            // Request current count immediately after connection
+            fetchCurrentUserCount();
+            
+        }, function (error) {
+            isConnected = false;
+            console.error('WebSocket connection failed:', error);
             setTimeout(connect, 5000); // Retry every 5 seconds
         });
     }
 
+    // Fetch initial count on page load
+    fetchCurrentUserCount();
+    
+    // Connect to WebSocket
     connect();
 </script>
 </body>

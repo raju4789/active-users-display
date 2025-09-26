@@ -6,10 +6,17 @@ spring:
     port: 6379
     lettuce:
       pool:
-        max-active: 10
-        max-idle: 5
-        min-idle: 1
-      timeout: 3000
+        max-active: 100
+        max-idle: 50
+        min-idle: 10
+      timeout: 5000
+
+# Server capacity configuration
+app:
+  server:
+    max-users: 1000000        # Maximum users per server instance
+    warning-threshold: 800000 # Warning when approaching capacity
+    enable-load-balancing: true
 
 management:
   server:
@@ -18,5 +25,9 @@ management:
     web:
       exposure:
         include: "*"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 

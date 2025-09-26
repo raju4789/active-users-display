@@ -2,17 +2,15 @@ package com.raju.medium.active_users_display.listener;
 
 import com.raju.medium.active_users_display.controller.WebSocketController;
 import com.raju.medium.active_users_display.service.ActiveUserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+@Slf4j
 @Component
 public class WebSocketEventListener {
-
-    private static final Logger logger = LoggerFactory.getLogger(WebSocketEventListener.class);
 
     private final ActiveUserService activeUserService;
     private final WebSocketController webSocketController;
@@ -25,34 +23,32 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         try {
-            // Extract session ID using a safer approach
             String sessionId = extractSessionId(event);
             if (sessionId != null) {
-                activeUserService.addUser(sessionId); // Add session ID to Redis
-                webSocketController.broadcastUserCount(activeUserService.getActiveUserCount());
-                logger.info("User connected: {}", sessionId);
+                long newCount = activeUserService.addUserAndGetCount(sessionId);
+                webSocketController.broadcastUserCount((int) newCount);
+                log.info("User connected: {}. New count: {}", sessionId, newCount);
             } else {
-                logger.warn("Failed to extract session ID during connection event.");
+                log.warn("Failed to extract session ID during connection event.");
             }
         } catch (Exception e) {
-            logger.error("Error handling WebSocket connection event", e);
+            log.error("Error handling WebSocket connection event", e);
         }
     }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         try {
-            // Extract session ID using a safer approach
             String sessionId = extractSessionId(event);
             if (sessionId != null) {
-                activeUserService.removeUser(sessionId); // Remove session ID from Redis
-                webSocketController.broadcastUserCount(activeUserService.getActiveUserCount());
-                logger.info("User disconnected: {}", sessionId);
+                long newCount = activeUserService.removeUserAndGetCount(sessionId);
+                webSocketController.broadcastUserCount((int) newCount);
+                log.info("User disconnected: {}. New count: {}", sessionId, newCount);
             } else {
-                logger.warn("Failed to extract session ID during disconnection event.");
+                log.warn("Failed to extract session ID during disconnection event.");
             }
         } catch (Exception e) {
-            logger.error("Error handling WebSocket disconnection event", e);
+            log.error("Error handling WebSocket disconnection event", e);
         }
     }
 
